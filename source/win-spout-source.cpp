@@ -60,9 +60,9 @@ static bool win_spout_source_store_sender_info(spout_source *context)
 {
 	unsigned int width, height;
 	// get info about this active sender:
-	if (!context->spout_receiver_ptr->GetSenderInfo(context->senderName, width,
-					height, context->dxHandle,
-					context->dxFormat)) {
+	if (!context->spout_receiver_ptr->GetSenderInfo(
+		    context->senderName, width, height, context->dxHandle,
+		    context->dxFormat)) {
 		return false;
 	}
 
@@ -105,11 +105,13 @@ static void win_spout_source_init(void *data, bool forced = false)
 	}
 
 	if (context->useFirstSender) {
-		if (context->spout_receiver_ptr->GetSender(0, context->senderName)) {
+		if (context->spout_receiver_ptr->GetSender(
+			    0, context->senderName)) {
 			if (!context->spout_receiver_ptr->SetActiveSender(
 				    context->senderName)) {
 				if (context->spout_status != -4) {
-					info("WoW , i can't set active sender as %s", context->senderName);
+					info("WoW , i can't set active sender as %s",
+					     context->senderName);
 					context->spout_status = -4;
 				}
 				return;
@@ -127,7 +129,8 @@ static void win_spout_source_init(void *data, bool forced = false)
 		bool exists = false;
 		// then get the name of each sender from SPOUT
 		for (index = 0; index < totalSenders; index++) {
-			context->spout_receiver_ptr->GetSender(index, senderName);
+			context->spout_receiver_ptr->GetSender(index,
+							       senderName);
 			if (strcmp(senderName, context->senderName) == 0) {
 				exists = true;
 				break;
@@ -135,7 +138,8 @@ static void win_spout_source_init(void *data, bool forced = false)
 		}
 		if (!exists) {
 			if (context->spout_status != -5) {
-				info("Sorry, Sender Name %s not found", context->senderName);
+				info("Sorry, Sender Name %s not found",
+				     context->senderName);
 				context->spout_status = -5;
 			}
 			return;
@@ -148,14 +152,14 @@ static void win_spout_source_init(void *data, bool forced = false)
 	if (!win_spout_source_store_sender_info(context)) {
 		warn("Named %s sender not found", context->senderName);
 	} else {
-		info("Sender %s is of dimensions %d x %d",
-		     context->senderName,
+		info("Sender %s is of dimensions %d x %d", context->senderName,
 		     context->width, context->height);
 	};
 
 	obs_enter_graphics();
 	gs_texture_destroy(context->texture);
-	context->texture = gs_texture_open_shared((uint32_t)(uintptr_t)context->dxHandle);
+	context->texture =
+		gs_texture_open_shared((uint32_t)(uintptr_t)context->dxHandle);
 	obs_leave_graphics();
 
 	context->initialized = true;
@@ -209,7 +213,8 @@ static const char *win_spout_source_get_name(void *unused)
 // of the plugin functions as void *data
 static void *win_spout_source_create(obs_data_t *settings, obs_source_t *source)
 {
-	struct spout_source *context = (spout_source *)bzalloc(sizeof(spout_source));
+	struct spout_source *context =
+		(spout_source *)bzalloc(sizeof(spout_source));
 	info("initialising spout source");
 	context->spout_receiver_ptr = GetSpout();
 	context->source = source;
@@ -220,9 +225,8 @@ static void *win_spout_source_create(obs_data_t *settings, obs_source_t *source)
 	context->dxHandle = NULL;
 	context->initialized = false;
 
-	// set the initial size as 100x100 until we
-	// have the actual dimensions from SPOUT
-	context->width = context->height = 100;
+	// Setting size as 0 to not allow resizing of not initialized source
+	context->width = context->height = 0;
 
 	win_spout_source_update(context, settings);
 	return context;
@@ -246,12 +250,15 @@ static void win_spout_source_defaults(obs_data_t *settings)
 {
 	obs_data_set_default_string(settings, SPOUT_SENDER_LIST,
 				    USE_FIRST_AVAILABLE_SENDER);
-	obs_data_set_default_int(settings, "tickspeedlimit", 100);
+	obs_data_set_default_int(settings, "tickspeedlimit", 500);
+	obs_data_set_default_int(settings, "compositemode",
+				 COMPOSITE_MODE_DEFAULT);
 }
 
 static void win_spout_source_show(void *data)
 {
-	win_spout_source_init(data, true); // When showing do forced init without delay
+	win_spout_source_init(
+		data, true); // When showing do forced init without delay
 }
 
 static void win_spout_source_hide(void *data)
@@ -303,7 +310,8 @@ static void win_spout_source_render(void *data, gs_effect_t *effect)
 		effect = obs_get_base_effect(OBS_EFFECT_OPAQUE);
 		break;
 	case COMPOSITE_MODE_ALPHA:
-		effect = obs_get_base_effect(OBS_EFFECT_PREMULTIPLIED_ALPHA); // Converts premultiplied to regular alpha before blending it as regular transparency.
+		effect = obs_get_base_effect(
+			OBS_EFFECT_PREMULTIPLIED_ALPHA); // Converts premultiplied to regular alpha before blending it as regular transparency.
 		break;
 	case COMPOSITE_MODE_PREMULTIPLIED:
 		effect = obs_get_base_effect(OBS_EFFECT_DEFAULT);
