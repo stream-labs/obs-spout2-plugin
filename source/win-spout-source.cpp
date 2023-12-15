@@ -232,7 +232,7 @@ static void *win_spout_source_create(obs_data_t *settings, obs_source_t *source)
 	return context;
 }
 
-static void win_spout_source_destroy(void *data)
+static void win_spout_source_actually_destroy(void *data)
 {
 	struct spout_source *context = (spout_source *)data;
 
@@ -244,6 +244,11 @@ static void win_spout_source_destroy(void *data)
 	}
 
 	bfree(context);
+}
+
+static void win_spout_source_destroy(void *data)
+{
+	obs_queue_task(OBS_TASK_GRAPHICS, win_spout_source_actually_destroy, data, false);
 }
 
 static void win_spout_source_defaults(obs_data_t *settings)
