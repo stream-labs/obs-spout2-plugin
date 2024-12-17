@@ -48,6 +48,6 @@ function(install_spout_dependencies)
 endfunction()
 
 set_target_properties(win-spout PROPERTIES FOLDER "plugins")
-setup_plugin_target(win-spout)
+set_target_properties_obs(win-spout PROPERTIES FOLDER plugins/win-spout PREFIX "")
 
 install_spout_dependencies()
